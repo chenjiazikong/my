@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>番茄工作法应用原型</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background: #f0f0f0;
+            padding: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .screen {
+            width: 375px;
+            height: 812px;
+            background: #fff;
+            border-radius: 40px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        /* 状态栏样式 */
+        .status-bar {
+            height: 44px;
+            background: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 14px;
+            color: #000;
+        }
+
+        /* 主计时器界面 */
+        .timer-screen {
+            background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
+        }
+
+        .timer-circle {
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            border: 4px solid rgba(255,255,255,0.3);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            font-size: 48px;
+            font-weight: 200;
+        }
+
+        .timer-controls {
+            position: absolute;
+            bottom: 100px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+        }
+
+        .timer-button {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        /* 任务列表界面 */
+        .tasks-screen {
+            background: #fff;
+        }
+
+        .tasks-header {
+            padding: 20px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .add-task-btn {
+            background: #FF6B6B;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+
+        .add-task-btn:active {
+            transform: scale(0.98);
+        }
+
+        .task-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .task-modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 320px;
+        }
+
+        .task-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        .pomodoro-count {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .pomodoro-count button {
+            width: 30px;
+            height: 30px;
+            border: none;
+            background: #f0f0f0;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .cancel-btn {
+            background: #f0f0f0;
+        }
+
+        .confirm-btn {
+            background: #FF6B6B;
+            color: white;
+        }
+
+        .task-item {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .task-checkbox {
+            width: 22px;
+            height: 22px;
+            border: 2px solid #ddd;
+            border-radius: 50%;
+        }
+
+        /* 统计界面 */
+        .stats-screen {
+            background: #fff;
+        }
+
+        .stats-chart {
+            padding: 20px;
+            height: 300px;
+            background: #f8f8f8;
+            margin: 20px;
+            border-radius: 16px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .stats-card {
+            background: #f8f8f8;
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+        }
+
+        /* 设置界面 */
+        .settings-screen {
+            background: #fff;
+        }
+
+        .settings-list {
+            margin-top: 20px;
+        }
+
+        .settings-item {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* 底部导航栏 */
+        .tab-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 84px;
+            background: rgba(255,255,255,0.95);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid #f0f0f0;
+            padding-bottom: 20px;
+        }
+
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: #999;
+            font-size: 10px;
+        }
+
+        .tab-item i {
+            font-size: 24px;
+        }
+
+        .tab-item.active {
+            color: #FF6B6B;
+        }
+    </style>
+</head>
+<body>
+    <!-- 主计时器界面 -->
+    <div class="screen timer-screen">
+        <div class="status-bar">
+            <span>9:41</span>
+            <div>
+                <i class="fas fa-signal"></i>
+                <i class="fas fa-wifi"></i>
+                <i class="fas fa-battery-full"></i>
+            </div>
+        </div>
+        <div class="timer-circle">
+            25:00
+        </div>
+        <div class="timer-controls">
+            <div class="timer-button">
+                <i class="fas fa-play"></i>
+            </div>
+            <div class="timer-button">
+                <i class="fas fa-redo"></i>
+            </div>
+        </div>
+        <div class="tab-bar">
+            <div class="tab-item active">
+                <i class="fas fa-clock"></i>
+                <span>计时器</span>
+            </div>
+            <div class="tab-item">
+                <i class="fas fa-tasks"></i>
+                <span>任务</span>
+            </div>
+            <div class="tab-item">
+                <i class="fas fa-chart-bar"></i>
+                <span>统计</span>
+            </div>
+            <div class="tab-item">
+                <i class="fas fa-cog"></i>
+                <span>设置</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 任务列表界面 -->
+    <div class="screen tasks-screen">
+        <div class="status-bar">
+            <span>9:41</span>
+            <div>
+                <i class="fas fa-signal"></i>
+                <i class="fas fa-wifi"></i>
+                <i class="fas fa-battery-full"></i>
+            </div>
+        </div>
+        <div class="tasks-header">
+            <h2>今日任务</h2>
+            <button class="add-task-btn">
+                <i class="fas fa-plus"></i>
+                <span>添加任务</span>
+            </button>
+        </div>
+        <div class="task-item">
+            <div class="task-checkbox"></div>
+            <div class="task-content">
+                <h3>完成产品设计文档</h3>
+                <p>预计 4 个番茄钟</p>
+            </div>
+        </div>
+        <div class="task-item">
+            <div class="task-checkbox"></div>
+            <div class="task-content">
+                <h3>回复重要邮件</h3>
+                <p>预计 2 个番茄钟</p>
+            </div>
+        </div>
+        <div class="tab-bar">
+            <div class="tab-item">
+                <i class="fas fa-clock"></i>
+                <span>计时器</span>
+            </div>
+            <div class="tab-item active">
+                <i class="fas fa-tasks"></i>
+                <span>任务</span>
+            </div>
+            <div class="tab-item">
+                <i class="fas fa-chart-bar"></i>
+                <span>统计</span>
+            </div>
+            <div class="tab-item">
+                <i class="fas fa-cog"></i>
+                <span>设置</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加任务模态框 -->
+    <div class="task-modal">
+        <div class="task-modal-content">
+            <h3>添加新任务</h3>
+            <input type="text" class="task-input" placeholder="输入任务名称">
+            <div class="pomodoro-count">
+                <span>预计番茄数：</span>
+                <button class="decrease-pomodoro">-</button>
+                <span class="pomodoro-number">1</span>
+                <button class="increase-pomodoro">+</button>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn cancel-btn">取消</button>
+                <button class="modal-btn confirm-btn">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 统计界面 -->
+    <div class="screen stats-screen">
+        <div class="status-bar">
+            <span>9:41</span>
+            <div>
+                <i class="fas fa-signal"></i>
+                <i class="fas fa-wifi"></i>
+                <i class="fas fa-battery-full"></i>
+            </div>
+        </div>
+        <div class="tasks-header">
+            <h2>专注统计</h2>
+        </div>
+        <div class="stats-chart">
+            <!-- 这里可以放置实际的统计图表 -->
+            <div style="color: #999; text-align: center; padding-top: 120px;">
+                周专注时长统计图表
+            </div>
+        </div>
+        <div class="stats-grid">
+            <div class="stats-card">
+                <h3>今日专注</h3>
+                <p style="font-size: 24px; margin-top: 8px;">120分钟</p>
+            </div>
+            <div class="stats-card">
+                <h3>完成任务</h3>
+                <p style="font-size: 24px; margin-top: 8px;">8个</p>
+            </div>
+        </div>
+        <div class="tab-bar">
+            <div class="tab-item">
+                <i class="fas fa-clock"></i>
+                <span>计时器</span>
+            </div>
+            <div class="tab-item">
+                <i class="fas fa-tasks"></i>
+                <span>任务</span>
+            </div>
+            <div class="tab-item active">
+                <i class="fas fa-chart-bar"></i>
+                <span>统计</span>
+            </div>
+            <div class="tab-item">
+                <i class="fas fa-cog"></i>
+                <span>设置</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 设置界面 -->
+    <div class="screen settings-screen">
+        <div class="status-bar">
+            <span>9:41</span>
+            <div>
+                <i class="fas fa-signal"></i>
+                <i class="fas fa-wifi"></i>
+                <i class="fas fa-battery-full"></i>
+            </div>
+        </div>
+        <div class="tasks-header">
+            <h2>设置</h2>
+        </div>
+        <div class="settings-list">
+            <div class="settings-item">
+                <span>专注时长</span>
+                <span>25分钟 ></span>
+            </div>
+            <div class="settings-item">
+                <span>短休息时长</span>
+                <span>5分钟 ></span>
+            </div>
+            <div class="settings-item">
+                <span>长休息时长</span>
+                <span>15分钟 ></span>
+            </div>
+            <div class="settings-item">
+                <span>自动开始休息</span>
+                <span><i class="fas fa-toggle-on" style="color: #FF6B6B;"></i></span>
+            </div>
+            <div class="settings-item">
+                <span>声音提醒</span>
+                <span><i class="fas fa-toggle-on" style="color: #FF6B6B;"></i></span>
+            </div>
+        </div>
+        <div class="tab-bar">
+            <div class="tab-item">
+                <i class="fas fa-clock"></i>
+                <span>计时器</span>
+            </div>
+            <div class="tab-item">
+                <i class="fas fa-tasks"></i>
+                <span>任务</span>
+            </div>
+            <div class="tab-item">
+                <i class="fas fa-chart-bar"></i>
+                <span>统计</span>
+            </div>
+            <div class="tab-item active">
+                <i class="fas fa-cog"></i>
+                <span>设置</span>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    // 计时器相关变量
+    let timerInterval;
+    let timeLeft = 25 * 60; // 25分钟
+    let isTimerRunning = false;
+    let currentMode = 'work'; // 'work' 或 'break'
+
+    // 页面切换功能
+    const screens = document.querySelectorAll('.screen');
+    const tabBars = document.querySelectorAll('.tab-bar');
+    
+    // 为每个底部导航栏添加点击事件
+    tabBars.forEach(tabBar => {
+        const tabItems = tabBar.querySelectorAll('.tab-item');
+        
+        tabItems.forEach((tab, index) => {
+            tab.addEventListener('click', () => {
+                // 获取所有导航项
+                const allTabItems = document.querySelectorAll('.tab-item');
+                
+                // 移除所有激活状态
+                allTabItems.forEach(item => {
+                    item.classList.remove('active');
+                });
+                
+                // 激活当前点击的导航项
+                const currentIndex = Array.from(tabItems).indexOf(tab);
+                document.querySelectorAll(`.tab-item:nth-child(${currentIndex + 1})`).forEach(item => {
+                    item.classList.add('active');
+                });
+                
+                // 隐藏所有屏幕
+                screens.forEach(screen => {
+                    screen.style.display = 'none';
+                });
+                
+                // 显示对应的屏幕
+                screens[currentIndex].style.display = 'block';
+            });
+        });
+    });
+
+    // 初始化显示第一个屏幕
+    screens.forEach((screen, index) => {
+        screen.style.display = index === 0 ? 'block' : 'none';
+    });
+
+    // 计时器功能
+    const timerDisplay = document.querySelector('.timer-circle');
+    const playButton = document.querySelector('.timer-button:first-child');
+    const resetButton = document.querySelector('.timer-button:last-child');
+
+    function updateTimerDisplay() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    function startTimer() {
+        if (!isTimerRunning) {
+            isTimerRunning = true;
+            playButton.innerHTML = '<i class="fas fa-pause"></i>';
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+
+                if (timeLeft === 0) {
+                    clearInterval(timerInterval);
+                    isTimerRunning = false;
+                    playButton.innerHTML = '<i class="fas fa-play"></i>';
+                    
+                    // 播放提示音
+                    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZSA0PVqzn77BdGAg+ltryxnMpBSl+zPLaizsIGGS57OihUBELTKXh8bllHgU2jdXzzn0vBSF1xe/glEILElyx6OyrWBUIQ5zd8sFuJAUuhM/z1YU2Bhxqvu7mnEoODlOq5O+zYBoGPJPY88p2KwUme8rx3I4+CRZiturqpVITC0mi4PK8aB8GM4nU8tGAMQYfcsLu45ZFDBFYr+ftrVoXCECY3PLEcSYELIHO8diJOQgZaLvt559NEAxPqOPwtmMcBjiP1/PMeS0GI3fH8N2RQAoUXrTp66hVFApGnt/yvmwhBTCG0fPTgjQGHW/A7eSaRw0PVqzl77BdGAg+ltrzxnUoBSh+zPDaizsIGGS56+mjTxELTKXh8bllHgU1jdT0z3wvBSJ0xe/glEILElyx6OyrWRUIRJve8sFuJAUug8/z1YU2BRxqvu3mnEoPDlOq5O+zYRoGPJPY88p3KgUme8rx3I4+CRVht+rqpVMSC0mh4fK8aiAFM4nU8tGAMQYfccPu45ZFDBFYr+ftrVwWCECY3PLEcSYGK4DN8tiIOQgZZ7zs56BODwxPpuPxtmQcBjiP1/PMeywGI3fH8N+RQAoUXrTp66hWEwlGnt/yv2wiBDCG0fPTgzQGHm/A7eSaSQ0PVqzl77BdGAg+ltvyxnUoBSh9y/HajDsIF2W56+mjUREKTKPi8blnHgU1jdTy0HwvBSF0xPDglEILElyx6OyrWRUJQ5vd88FwJAQug8/z1YY2BRxqvu3mnEoPDlOq5O+zYRoGPJLZ88p3KgUmfMrx3I4+CRVht+rqpVMSC0mh4fK8aiAFM4nU8tGBMQYfccLv45ZFDBFYr+ftrVwXB0CY3PLEcSYGK4DN8tiIOQgZZ7vs56BODwxPpuPxtmQcBjiP1/PMeywGI3fH8N+RQAoUXrTp66hWEwlGnt/yv2wiBDCG0fPTgzQGHm/A7eSaSQ0PVqzl77BdGAg+ltvyxnUoBSh9y/HajDsIF2W56+mjUREKTKPi8blnHgU1jdTy0HwvBSF0xPDglEILElyx6OyrWRUJQ5vd88FwJAQug8/z1YY2BRxqvu3mnEoPDlOq5O+zYRoGPJLZ88p3KgUmfMrx3I4+CRVht+rqpVMSC0mh4fK8aiAFM4nU8tGBMQY=');
+                    audio.play();
+                    
+                    // 切换到休息模式或工作模式
+                    if (currentMode === 'work') {
+                        currentMode = 'break';
+                        timeLeft = 5 * 60; // 5分钟休息
+                        document.querySelector('.timer-screen').style.background = 'linear-gradient(135deg, #4CAF50, #8BC34A)';
+                    } else {
+                        currentMode = 'work';
+                        timeLeft = 25 * 60;
+                        document.querySelector('.timer-screen').style.background = 'linear-gradient(135deg, #FF6B6B, #FF8E8E)';
+                    }
+                    updateTimerDisplay();
+                }
+            }, 1000);
+        } else {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            playButton.innerHTML = '<i class="fas fa-play"></i>';
+        }
+    }
+
+    function resetTimer() {
+        clearInterval(timerInterval);
+        isTimerRunning = false;
+        timeLeft = 25 * 60;
+        currentMode = 'work';
+        document.querySelector('.timer-screen').style.background = 'linear-gradient(135deg, #FF6B6B, #FF8E8E)';
+        playButton.innerHTML = '<i class="fas fa-play"></i>';
+        updateTimerDisplay();
+    }
+
+    playButton.addEventListener('click', startTimer);
+    resetButton.addEventListener('click', resetTimer);
+
+    // 任务列表功能
+    const checkboxes = document.querySelectorAll('.task-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('click', function() {
+            this.style.background = this.style.background ? '' : '#FF6B6B';
+            const taskContent = this.nextElementSibling;
+            taskContent.style.textDecoration = taskContent.style.textDecoration === 'line-through' ? 'none' : 'line-through';
+            taskContent.style.opacity = taskContent.style.opacity === '0.5' ? '1' : '0.5';
+        });
+    });
+
+    // 设置选项点击效果
+    const settingsItems = document.querySelectorAll('.settings-item');
+    settingsItems.forEach(item => {
+        if (!item.querySelector('.fa-toggle-on')) {
+            item.addEventListener('click', () => {
+                // 模拟点击效果
+                item.style.backgroundColor = '#f0f0f0';
+                setTimeout(() => {
+                    item.style.backgroundColor = '';
+                }, 200);
+            });
+        }
+    });
+
+    // 统计图表模拟数据
+    const chartPlaceholder = document.querySelector('.stats-chart div');
+    chartPlaceholder.innerHTML = `
+        <div style="height: 200px; display: flex; align-items: flex-end; justify-content: space-around; padding: 20px;">
+            ${Array.from({length: 7}, () => Math.floor(Math.random() * 150 + 50)).map(height => 
+                `<div style="width: 30px; height: ${height}px; background: linear-gradient(to top, #FF6B6B, #FF8E8E); border-radius: 4px;"></div>`
+            ).join('')}
+        </div>
+        <div style="display: flex; justify-content: space-around; color: #666;">
+            <span>一</span>
+            <span>二</span>
+            <span>三</span>
+            <span>四</span>
+            <span>五</span>
+            <span>六</span>
+            <span>日</span>
+        </div>
+    `;
+
+    // 任务添加功能
+    const addTaskBtn = document.querySelector('.add-task-btn');
+    const taskModal = document.querySelector('.task-modal');
+    const taskInput = document.querySelector('.task-input');
+    const cancelBtn = document.querySelector('.cancel-btn');
+    const confirmBtn = document.querySelector('.confirm-btn');
+    const decreaseBtn = document.querySelector('.decrease-pomodoro');
+    const increaseBtn = document.querySelector('.increase-pomodoro');
+    const pomodoroNumber = document.querySelector('.pomodoro-number');
+
+    // 打开模态框
+    addTaskBtn.addEventListener('click', () => {
+        taskModal.style.display = 'flex';
+        taskInput.value = '';
+        pomodoroNumber.textContent = '1';
+    });
+
+    // 关闭模态框
+    cancelBtn.addEventListener('click', () => {
+        taskModal.style.display = 'none';
+    });
+
+    // 点击模态框外部关闭
+    taskModal.addEventListener('click', (e) => {
+        if (e.target === taskModal) {
+            taskModal.style.display = 'none';
+        }
+    });
+
+    // 增减番茄数
+    decreaseBtn.addEventListener('click', () => {
+        let count = parseInt(pomodoroNumber.textContent);
+        if (count > 1) {
+            pomodoroNumber.textContent = count - 1;
+        }
+    });
+
+    increaseBtn.addEventListener('click', () => {
+        let count = parseInt(pomodoroNumber.textContent);
+        if (count < 8) {
+            pomodoroNumber.textContent = count + 1;
+        }
+    });
+
+    // 添加新任务
+    confirmBtn.addEventListener('click', () => {
+        const taskName = taskInput.value.trim();
+        const pomodoroCount = parseInt(pomodoroNumber.textContent);
+        
+        if (taskName) {
+            const taskList = document.querySelector('.tasks-screen');
+            const newTask = document.createElement('div');
+            newTask.className = 'task-item';
+            newTask.innerHTML = `
+                <div class="task-checkbox"></div>
+                <div class="task-content">
+                    <h3>${taskName}</h3>
+                    <p>预计 ${pomodoroCount} 个番茄钟</p>
+                </div>
+            `;
+
+            // 在header后面插入新任务
+            const tasksHeader = taskList.querySelector('.tasks-header');
+            tasksHeader.insertAdjacentElement('afterend', newTask);
+
+            // 为新任务添加点击事件
+            const checkbox = newTask.querySelector('.task-checkbox');
+            checkbox.addEventListener('click', function() {
+                this.style.background = this.style.background ? '' : '#FF6B6B';
+                const taskContent = this.nextElementSibling;
+                taskContent.style.textDecoration = taskContent.style.textDecoration === 'line-through' ? 'none' : 'line-through';
+                taskContent.style.opacity = taskContent.style.opacity === '0.5' ? '1' : '0.5';
+            });
+
+            // 关闭模态框
+            taskModal.style.display = 'none';
+        }
+    });
+</script>
+</html> 
